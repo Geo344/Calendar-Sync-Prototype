@@ -1,0 +1,4 @@
+scheduled_calendar_sync_job:
+  cron: '0 0 * * *'
+  class: 'ScheduledCalendarSyncJob'
+  queue: 'default'
