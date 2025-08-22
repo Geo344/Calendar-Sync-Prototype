@@ -1,0 +1,7 @@
+<h1>Welcome to Your Calendar App!</h1>
+
+<p>Please connect your Google account or your Microsoft Outlook account to get started.</p>
+
+<%= button_to "Connect with Google", "/auth/google_oauth2", method: :post, data: { turbo: false } %>
+
+<%= button_to "Connect with Outlook", "/auth/microsoft_graph", method: :post, data: { turbo: false } %>

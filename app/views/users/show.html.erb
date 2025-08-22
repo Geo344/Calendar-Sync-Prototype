@@ -1,0 +1,70 @@
+<h1>Your Profile</h1>
+
+<% if current_user %>
+  <p>Hello, <%= current_user.name %>!</p>
+
+  <% google_account = current_user.service_account_for(:google_oauth2) %>
+  <% microsoft_account = current_user.service_account_for(:microsoft_graph) %>
+
+  
+  <% if google_account.present? && !microsoft_account.present? %>
+    <p>Your Google email: <%= google_account.email %></p>
+    <p>Your Google account is now connected!</p>
+    
+  <% elsif !google_account.present? && microsoft_account.present? %>
+    <p>Your Microsoft email: <%= microsoft_account.email %></p>
+    <p>Your Microsoft account is now connected!</p>
+    
+  <% elsif google_account.present? && microsoft_account.present? %>
+    <p>Your Google email: <%= google_account.email %></p>
+    <p>Your Google account is now connected!</p>
+    <p>Your Microsoft email: <%= microsoft_account.email %></p>
+    <p>Your Microsoft account is now connected!</p>
+  <% else %>
+    <p>You are not connected to either Google or Microsoft. Please choose a provider to sign in:</p>
+    
+    <%= button_to "Connect with Google", "/auth/google_oauth2", method: :post, data: { turbo: false } %>
+
+    <%= button_to "Connect with Outlook", "/auth/microsoft_graph", method: :post, data: { turbo: false } %>
+    
+  <% end %>
+
+  <% if current_user.service_accounts.any? %>
+    <p>
+      <%= button_to "Disconnect All Accounts", logout_path, method: :delete %>
+    </p>
+  <% end %>
+
+  <% if current_user.status == 'in_progress' %>
+    <div id="download-status">
+      <p>Preparing your calendar data...</p>
+      <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+      function checkStatus() {
+        fetch('/user/calendar_status')
+          .then(response => response.json())
+          .then(data => {
+            const statusDiv = document.getElementById('download-status');
+            if (data.status === 'completed') {
+              statusDiv.innerHTML = '<p>Success!</p>';
+            } else if (data.status === 'failed') {
+              statusDiv.innerHTML = '<p class="error">Failed to download calendar data. Please try again.</p>';
+            } else {
+              setTimeout(checkStatus, 2000); // Poll again in 2 seconds
+            }
+          });
+      }
+      checkStatus();
+    </script>
+  <% end %>
+
+<% else %>
+  <p>You are not connected. Please choose a provider to sign in:</p>
+  
+  <%= button_to "Connect with Google", "/auth/google_oauth2", method: :post, data: { turbo: false } %>
+
+  <%= button_to "Connect with Outlook", "/auth/microsoft_graph", method: :post, data: { turbo: false } %>
+
+<% end %>
